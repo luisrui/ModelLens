@@ -1,0 +1,75 @@
+# Ablation: pairwise + pointwise loss (no listwise)
+# Base: MLPMetricFull_unified_augmented.yaml (ensemble = listwise + pairwise + pointwise)
+# Change: loss_type ensemble -> pairwise_pointwise
+
+# General Setting
+device: 0
+use_data_parallel: False
+device_ids: [0, 1, 2, 3]
+use_ddp: True
+ddp_find_unused_parameters: False
+num_workers: 0
+pin_memory: False
+persistent_workers: False
+data_name: unified_augmented
+ood_split_mode: new_dataset_evaluation
+test_split_mode: val
+seed: 2025
+
+# Wandb Setting
+use_wandb: True
+wandb_project: ModelProfile
+wandb_entity: ruicai-ucdavis
+trail_name: method_ablation_pairwise_pointwise
+
+# Training Setting
+start_epoch: 0
+checkpoint_path: ""
+is_train: True
+is_ood: False
+loss_type: pairwise_pointwise
+point_loss_weight: 0.1
+early_stop: 20
+num_epochs: 1000
+batch_size: 8
+pair_batch_size: 1024
+learning_rate: 0.001
+weight_decay: 0.0001
+tau: 10.0
+
+# Data Setting
+alpha: 3.0
+size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 3, 7, 14, 35, 70, 100, 1000]
+
+##### Model Information (ALL model features)
+use_id_emb: True
+model_dim: 1536
+token_dim: 512
+use_size_prior: True
+size_dim: 64
+use_family_prior: True
+family_dim: 64
+
+##### Model Description (pre-computed, frozen)
+model_desp_emb_dim: 1536
+model_desp_emb_path: data/unified_augmented/model2desp_embeddings.npz
+
+##### Dataset Information (BOTH dataset ID + description)
+use_dataset_id_as_desp: True
+dataset_desp_dim: 1
+dataset_id_emb_dim: 256
+dataset_desp_emb_dim: 1536
+task_dim: 256
+
+# Ranking Model Setting
+model_name: MLPMetricFull
+hidden_dim: 512
+dropout_rate: 0.02
+
+# Evaluation Setting
+topk: [1,3,5,7,10, 30, 50, 70, 100]
+margin_eps: 0.02
+val_eval_target_models_all_datasets: False
+val_eval_fixed_backbones: False
+save_best_ic8x10_checkpoint: False
+test_eval_target_models_all_datasets: False

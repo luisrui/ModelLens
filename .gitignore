@@ -1,0 +1,46 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environments
+.venv/
+venv/
+.env
+.python-version
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Data, checkpoints, logs (heavy + non-redistributable)
+data/
+checkpoint/
+checkpoints/
+log/
+logs/
+wandb/
+results/
+figures/
+
+# Cached embeddings
+feature_cache/
+*.npz
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Misc
+*.log
+*.pt
+*.pth
+*.ckpt

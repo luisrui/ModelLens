@@ -1,0 +1,97 @@
+# Information-source ablation -- (1) SEMANTIC-ONLY
+# Keep:   model name, model description, dataset description, task, metric
+# Remove: model ID, dataset ID, model size, model family, structural prior
+#
+# Tests whether pure semantic similarity between models and datasets is
+# sufficient for recommendation. Expect: reasonable cold-start generalization,
+# weaker performance on seen datasets relative to the full model.
+
+# General
+device: 0
+use_data_parallel: False
+device_ids: [0, 1, 2, 3]
+use_ddp: True
+ddp_find_unused_parameters: False
+num_workers: 0
+pin_memory: False
+persistent_workers: False
+data_name: unified_augmented
+ood_split_mode: new_dataset_evaluation
+test_split_mode: val
+seed: 2025
+
+# Wandb
+use_wandb: True
+wandb_project: ModelProfile
+wandb_entity: ruicai-ucdavis
+trail_name: ablation_info_semantic_only
+
+# Training
+start_epoch: 0
+checkpoint_path: ""
+is_train: True
+is_ood: True
+loss_type: ensemble
+point_loss_weight: 0.1
+early_stop: 20
+num_epochs: 1000
+batch_size: 8
+pair_batch_size: 1024
+learning_rate: 0.001
+weight_decay: 0.0001
+tau: 10.0
+
+# Ensemble
+lambda_list: 0.5
+lambda_pair: 1.0
+
+# Data
+alpha: 3.0
+size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 3, 7, 14, 35, 70, 100, 1000]
+
+##### Model Information (semantic-only)
+use_id_emb: True              # parent flag (kept True so dimensions resolve cleanly)
+model_dim: 1536
+token_dim: 512
+
+# --- information-source flags ---
+use_model_id_emb: False        # << OFF: no learned model-ID embedding
+use_model_name_emb: True       # << ON
+use_model_desc_emb: True       # << ON
+use_dataset_id_emb: False      # << OFF
+use_dataset_desc_emb: True     # << ON
+
+# --- structural priors / features (all OFF) ---
+use_size_feature: False
+use_size_prior: False
+size_dim: 64
+use_family_prior: False
+family_dim: 64
+
+##### Model Description (frozen)
+model_desp_emb_dim: 1536
+model_desp_emb_path: data/unified_augmented/model2desp_embeddings.npz
+
+##### Dataset Information
+use_dataset_id_as_desp: True
+dataset_desp_dim: 1
+dataset_id_emb_dim: 256
+dataset_desp_emb_dim: 1536
+task_dim: 256
+
+# Metric (kept)
+use_metric_feature: True
+
+# Model
+model_name: MLPMetricFull
+hidden_dim: 512
+dropout_rate: 0.02
+id_dropout_rate: 0.1
+
+# Evaluation
+topk: [1, 10, 30, 50]
+margin_eps: 0.02
+val_eval_target_models_all_datasets: False
+val_eval_fixed_backbones: False
+save_best_ic8x10_checkpoint: False
+test_eval_target_models_all_datasets: False
