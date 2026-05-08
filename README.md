@@ -6,29 +6,104 @@
 
 This repository contains the official implementation of **ModelLens**, the
 metric-aware ranking framework introduced in our paper *"ModelLens: Finding
-the Best for Your Task from Myriads of Models"*. 
+the Best for Your Task from Myriads of Models"*.
+
+<p align="center">
+  <img src="figures/teaser_figure/teaser_figure_v3.png" alt="ModelLens teaser" width="100%" />
+</p>
+
+<p align="center"><sub>
+<b>Left:</b> the <b>learned model–dataset atlas</b> — a single embedding
+space, trained on 1.62M public benchmark records, that co-locates
+<i>every</i> model and <i>every</i> dataset. Models from the same family
+(BERT / LLaMA / T5 / ViT / Whisper / …) cluster together, and datasets from
+the same domain (NLP / Vision / Speech / Retrieval / Multimodal / Math &
+Code) form their own neighborhoods. The geometry reflects <i>what works on
+what</i>, not just text similarity.
+&nbsp;&nbsp;<b>Right:</b> given an unseen target dataset (here:
+<b>MMMU</b>), ModelLens returns top-K candidates that are
+<i>task-appropriate</i> — multimodal LMs such as Gemini-2.5-Pro,
+Step-3-VL-108B and Qwen3-VL-235B — in stark contrast to the nearest
+text-embedding neighbors (DeBERTa-MNLI, mDeBERTa-Vietnamese, MiniLM-IMDb)
+which match the <i>description</i> but solve the wrong problem.
+</sub></p>
 
 ---
 
-## TL;DR
+## Why ModelLens
 
-The open-source model ecosystem now contains hundreds of thousands of
-pretrained models, and new models and datasets emerge continuously. Existing
-selection paradigms — AutoML, transferability estimation, and model routing —
-either (i) require a forward pass per candidate on the target dataset, or
-(ii) presuppose a small curated pool. Neither scales.
+The open-source model ecosystem is exploding. HuggingFace alone now hosts
+**hundreds of thousands** of pretrained models across thousands of
+architectures, and a practitioner facing a new task has to answer one
+deceptively simple question:
 
-ModelLens reframes model selection as a **ranking problem over (model,
-dataset, task, metric) tuples**, learned from the large-scale but noisy
-trace of public benchmark records. Once trained, it ranks **unseen models on
-unseen datasets** zero-shot, using only metadata (names, descriptions, model
-size, architecture family) — no forward pass on the target dataset is
-required.
+> *Which of these myriad models will do best on my dataset?*
 
-On a benchmark of **1.62M evaluation records spanning 47K models and 9.6K
-datasets**, ModelLens surpasses both metadata-only and forward-pass
+Existing answers are unsatisfying for very different reasons:
+
+* **AutoML / fine-tune-and-rank.** Train every candidate on the target
+  task and pick the winner. Optimal in the limit, infeasible at the scale
+  of hundreds of thousands of models.
+* **Transferability estimation** (LEEP, NCE, LogME, …). Cheaper than full
+  fine-tuning, but still requires *a forward pass per candidate on the
+  target dataset*. The cost grows linearly with the candidate pool, and
+  most estimators assume a single, well-defined task setup.
+* **Model routing** (RouterBench, RouteLLM, …). Fast at inference, but
+  presupposes a tiny, hand-curated pool of ~5–30 models. Asks "which of
+  these few?", not "which of these many?".
+* **Metadata-only retrieval.** Embed the model card and the dataset
+  description with a frozen text encoder, return nearest neighbors. Cheap
+  and scalable, but as the right panel of the teaser shows, *text
+  similarity is not task similarity*: a Vietnamese DeBERTa is among the
+  nearest text-neighbors of MMMU but a hopeless choice for solving it.
+
+ModelLens reframes model selection as a **ranking problem over
+`(model, dataset, task, metric)` tuples**, learned directly from the
+large-scale but noisy trace of public benchmark records. Once trained, it
+ranks **unseen models on unseen datasets** zero-shot, using only metadata
+(names, descriptions, model size, architecture family) — no forward pass
+on the target dataset, no curated pool.
+
+On a benchmark of **1.62M evaluation records spanning ~47K models and
+~9.6K datasets**, ModelLens surpasses both metadata-only and forward-pass
 transferability baselines, and its recommended Top-K pools improve five
 representative routers by **21%–81%** across QA benchmarks.
+
+---
+
+## What ModelLens learns: the model–dataset atlas
+
+A useful side-effect of training a single ranker over all
+`(model, dataset)` interactions is that we can inspect the resulting
+latent space directly. Each star below is a model, colored by
+**architecture family**; the surrounding scatter / mesh shows the
+datasets it has been evaluated on, colored by **task domain**.
+
+<table>
+  <tr>
+    <td align="center" width="50%"><sub>Atlas A — model embeddings only</sub></td>
+    <td align="center" width="50%"><sub>Atlas B — model–dataset interaction atlas</sub></td>
+  </tr>
+  <tr>
+    <td><img src="figures/teaser_figure/atlas_A_full_data.png" alt="Atlas A" /></td>
+    <td><img src="figures/teaser_figure/atlas_B_full_data.png" alt="Atlas B" /></td>
+  </tr>
+</table>
+
+Two patterns are striking:
+
+1. **Family structure emerges from performance, not from text.** Speech
+   models (orange) sharply detach from text LLMs (purple); retrieval
+   embedders (green) form their own arc; vision and multimodal models
+   bridge the vision/text continents. The model never sees these family
+   labels — they are *recovered* from co-evaluation patterns.
+2. **Models and datasets share the same geometry.** A new MMMU-like
+   dataset lands among multimodal LMs; a new GLUE-like benchmark lands
+   among encoder LMs. Recommendation reduces to nearest-neighbor lookup
+   in this learned space.
+
+This is the structure the ranker exploits — and the structure that purely
+text-embedding baselines fail to capture.
 
 ---
 
@@ -48,73 +123,9 @@ ModelLens/
 │   ├── procedure/   # listwise / pairwise / pointwise / ensemble training loops
 │   └── utils/       # metrics (Kendall-w τ, NDCG@K, Hit@K, Rec@K), family extractor
 ├── src/main.py      # entry point: parse YAML, build model, train, evaluate
+├── figures/         # teaser & atlas figures used in this README
 └── scripts/         # one-shot training and ablation drivers
 ```
-
----
-
-## Method overview
-
-ModelLens combines **structured inductive bias** with **flexible interaction
-modeling**. Three components instantiate this principle.
-
-### 1. Multi-view representations
-
-Each model `m` is encoded as a concatenation of three complementary parts:
-
-```
-h_m = [ e_m^id  ‖  e_m^name  ‖  e_m^desc ]
-```
-
-* `e_m^id` — learned ID embedding (memorisation of training-time behaviour)
-* `e_m^name` — token-averaged hashed name embedding (compositional)
-* `e_m^desc` — frozen pretrained-text-encoder embedding of the model card
-
-Each dataset `d` is encoded analogously as `h_d = [ e_d^id ‖ e_d^desc ]`. Two
-**structural** model attributes are encoded separately: a **size** bucket
-embedding `e_m^size` (capturing neural-scaling effects) and an **architecture
-family** embedding `e_m^fam` (capturing shared inductive biases).
-
-### 2. Residual + prior decomposition
-
-The compatibility score is decomposed into a *structural prior* — depending
-only on size and family — and a *residual interaction* term:
-
-```
-s_prior(m)        = MLP_prior( e_m^size ‖ e_m^fam )
-s_residual(m,d,t,μ) = w_pair^T · MLP_backbone([h_m ‖ h_d ‖ e_m^size ‖ e_m^fam ‖ e_t ‖ e_μ])
-ŝ(m,d,t,μ)        = (s_residual + s_prior) / max(τ, ε)
-```
-
-where `t` and `μ` are task-type and metric embeddings. A **pointwise head**
-`ẑ = w_point^T · h` predicts the within-group standardised score `z(m,d)`,
-which provides absolute-magnitude grounding for the shared backbone.
-
-### 3. ID dropout for cold-start generalisation
-
-Learned ID embeddings are powerful for memorisation but useless for unseen
-entities. During training each ID embedding is independently replaced with a
-shared `[UNK]` vector with probability `p_m`, `p_d`. This trains a single
-parameter set that operates in both regimes — when IDs are visible it
-memorises; when they are masked it relies entirely on names, descriptions,
-size, and family. At inference, unseen models or datasets simply map to
-`[UNK]` and are scored without any architectural change.
-
-### 4. Multi-objective training
-
-ModelLens is supervised with a weighted combination of three complementary
-losses (Section 3.5 of the paper):
-
-```
-L = λ_list · L_list  +  λ_pair · L_pair  +  λ_point · L_point
-```
-
-* `L_list` — Plackett–Luce listwise likelihood (global ranking structure)
-* `L_pair` — BPR pairwise loss (local preferences)
-* `L_point` — MSE on the within-group standardised score (absolute calibration)
-
-The full ensemble (`loss_type: ensemble` in YAML) reproduces Table 1 of the
-paper. Single-loss variants are provided in `config/method_ablation/`.
 
 ---
 
@@ -142,11 +153,10 @@ training is supported out of the box; see `scripts/train.sh`.
 
 ## Data
 
-The training corpus and pretrained checkpoints are **not** included in this
-repository — they are large and partially derived from third-party sources
-(HuggingFace, Open LLM Leaderboard, Papers-with-Code) whose licences must be
-respected when redistributing. Instructions for obtaining the cleaned corpus
-are below.
+The training corpus and pretrained checkpoints are **not** included in
+this repository — they are large and partially derived from third-party
+sources (HuggingFace, Open LLM Leaderboard, Papers-with-Code) whose
+licences must be respected when redistributing.
 
 The expected layout under `data/<data_name>/` is:
 
