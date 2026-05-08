@@ -30,13 +30,13 @@ log/
 logs/
 wandb/
 results/
-figures/*
+/figures/*
 # Keep the README figures (teaser + atlas) tracked
-!figures/teaser_figure/
-figures/teaser_figure/*
-!figures/teaser_figure/teaser_figure_v3.png
-!figures/teaser_figure/atlas_A_semantic_only.png
-!figures/teaser_figure/atlas_B_full_data.png
+!/figures/teaser_figure/
+/figures/teaser_figure/*
+!/figures/teaser_figure/teaser_figure_v3.png
+!/figures/teaser_figure/atlas_A_semantic_only.png
+!/figures/teaser_figure/atlas_B_full_data.png
 
 # Cached embeddings
 feature_cache/

@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ModelLens — Recommending the right foundation model for your task</title>
+  <meta name="description" content="ModelLens learns model–dataset compatibility from 1.62M public leaderboard records and recommends candidate foundation models for unseen tasks — without exhaustive evaluation.">
+
+  <meta property="og:title" content="ModelLens">
+  <meta property="og:description" content="Recommending the right foundation model for your task — without exhaustive evaluation.">
+  <meta property="og:image" content="figures/teaser.jpg">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='%230f172a'/%3E%3Ccircle cx='50' cy='50' r='18' fill='none' stroke='%2306b6d4' stroke-width='5'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%2306b6d4'/%3E%3C/svg%3E">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            navy: {
+              50:  '#f1f4f9', 100: '#dbe2ec', 200: '#b9c5d6', 300: '#8fa1bb',
+              400: '#637c9d', 500: '#475e80', 600: '#374a66', 700: '#2c3a52',
+              800: '#1f2a3d', 900: '#0f172a',
+            },
+            accent: {
+              50: '#ecfeff', 100: '#cffafe', 200: '#a5f3fc', 300: '#67e8f9',
+              400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490',
+            },
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .gradient-bg {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(6,182,212,0.10), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 20%, rgba(15,23,42,0.04), transparent 70%),
+        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    pre code { font-family: 'JetBrains Mono', monospace; }
+    .section-eyebrow { letter-spacing: 0.18em; }
+    @media (prefers-reduced-motion: no-preference) {
+      .float-in { opacity: 0; transform: translateY(8px); animation: floatIn .6s ease-out forwards; }
+      @keyframes floatIn { to { opacity: 1; transform: none; } }
+    }
+  </style>
+</head>
+<body class="bg-white text-navy-900 font-sans antialiased">
+
+<!-- =================== HERO =================== -->
+<section class="gradient-bg pt-20 md:pt-24 pb-16 px-6">
+  <div class="max-w-5xl mx-auto text-center float-in">
+
+    <div class="inline-flex items-center gap-2 px-3 py-1 mb-7 rounded-full bg-accent-50 border border-accent-200 text-accent-700 text-[11px] font-semibold tracking-wider uppercase">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-accent-500"></span>
+      Research preprint · 2026
+    </div>
+
+    <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-navy-900 mb-5 leading-[1.05]">
+      Model<span class="text-accent-600">Lens</span>
+    </h1>
+
+    <p class="text-xl md:text-2xl font-light text-navy-700 max-w-3xl mx-auto leading-snug mb-9">
+      Recommending the right foundation model for your task —
+      <span class="font-medium text-navy-900">without exhaustive evaluation</span>.
+    </p>
+
+    <p class="text-sm md:text-[15px] text-navy-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+      Rui Cai · Weijie Jacky Mo · Xiaofei Wen · Qiyao Ma · Wenhui Zhu · Xiwen Chen · Muhao Chen · Zhe Zhao
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-3 mb-14">
+      <a href="paper/ModelLens.pdf"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-navy-900 text-white text-sm font-medium hover:bg-navy-800 transition shadow-sm">
+        <i class="fa-solid fa-file-pdf"></i> Paper
+      </a>
+      <a href="https://github.com/luisrui/ModelLens" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
+        <i class="fa-brands fa-github"></i> Code
+      </a>
+      <a href="#demo"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
+        <i class="fa-solid fa-play"></i> Demo
+      </a>
+      <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-600 text-white text-sm font-medium hover:bg-accent-700 transition shadow-sm">
+        <span class="text-base leading-none">🤗</span> HuggingFace Space
+      </a>
+    </div>
+
+    <figure class="mt-4">
+      <img src="figures/teaser.jpg"
+           alt="Learned model–dataset atlas (left) and a model recommendation example for MMMU (right)."
+           class="w-full rounded-2xl shadow-xl border border-navy-100"
+           loading="eager">
+      <figcaption class="mt-5 text-sm text-navy-600 max-w-3xl mx-auto leading-relaxed">
+        <span class="font-semibold text-navy-900">Left:</span> the learned model–dataset atlas — every model and every dataset embedded in a single space, organised by family and domain.
+        <span class="font-semibold text-navy-900">Right:</span> for an unseen target dataset (MMMU), ModelLens returns multimodal-LM candidates such as Gemini-2.5-Pro and Qwen3-VL-235B — in stark contrast to text-similarity neighbours such as DeBERTa-MNLI.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- =================== WHAT IS MODELLENS =================== -->
+<section class="py-20 md:py-24 px-6 bg-white border-t border-navy-100">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">Motivation</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-12 max-w-3xl leading-tight">
+      Hundreds of thousands of models. <span class="text-navy-500 font-semibold">Which one should you use?</span>
+    </h2>
+
+    <div class="grid md:grid-cols-5 gap-10 items-start">
+      <div class="md:col-span-3 space-y-5 text-navy-700 leading-relaxed text-[15px]">
+        <p>HuggingFace alone hosts <span class="font-semibold text-navy-900">hundreds of thousands</span> of pretrained models, and new ones appear every day. For any new task, the very first question — <em>"which model should I use?"</em> — has become genuinely hard.</p>
+        <p>Existing answers each fall short:</p>
+        <ul class="space-y-2.5 pl-1">
+          <li class="flex gap-3"><span class="text-accent-600 mt-1.5"><i class="fa-solid fa-circle text-[6px]"></i></span><span><b>Fine-tune-and-rank</b> needs a forward pass per candidate — infeasible at scale.</span></li>
+          <li class="flex gap-3"><span class="text-accent-600 mt-1.5"><i class="fa-solid fa-circle text-[6px]"></i></span><span><b>Transferability estimation</b> still requires per-candidate compute on the target.</span></li>
+          <li class="flex gap-3"><span class="text-accent-600 mt-1.5"><i class="fa-solid fa-circle text-[6px]"></i></span><span><b>Model routing</b> assumes a tiny, hand-curated pool of ~5–30 models.</span></li>
+          <li class="flex gap-3"><span class="text-accent-600 mt-1.5"><i class="fa-solid fa-circle text-[6px]"></i></span><span><b>Text-embedding retrieval</b> matches descriptions, not behaviour.</span></li>
+        </ul>
+        <p class="pt-2">ModelLens learns model–dataset <span class="font-semibold text-navy-900">compatibility</span> directly from 1.62M public leaderboard records, then ranks unseen models on unseen datasets <span class="font-semibold text-navy-900">zero-shot</span> — using only metadata.</p>
+      </div>
+
+      <div class="md:col-span-2 bg-navy-50/60 rounded-2xl p-7 border border-navy-100">
+        <p class="text-[11px] text-navy-500 uppercase section-eyebrow font-semibold mb-5">By the numbers</p>
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div>
+            <p class="text-3xl font-bold text-navy-900">1.62M</p>
+            <p class="text-xs text-navy-600 mt-1">eval records</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-navy-900">47K</p>
+            <p class="text-xs text-navy-600 mt-1">models</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-navy-900">9.6K</p>
+            <p class="text-xs text-navy-600 mt-1">datasets</p>
+          </div>
+        </div>
+        <hr class="border-navy-200 mb-5">
+        <p class="text-3xl font-bold text-accent-600 leading-none">+21–81%</p>
+        <p class="text-sm text-navy-600 mt-2 leading-relaxed">improvement on five representative routers across QA benchmarks, using ModelLens-recommended candidate pools.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== METHOD =================== -->
+<section class="py-20 md:py-24 px-6 bg-navy-50/40">
+  <div class="max-w-6xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">Method</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-3">A three-stage pipeline</h2>
+    <p class="text-navy-600 max-w-3xl mb-12 text-[15px]">From noisy public leaderboard records to zero-shot recommendations for unseen datasets and unseen models.</p>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="bg-white rounded-2xl p-7 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-11 h-11 rounded-xl bg-accent-50 text-accent-600 flex items-center justify-center mb-5">
+          <i class="fa-solid fa-database text-lg"></i>
+        </div>
+        <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-2">Stage 1</p>
+        <h3 class="text-lg font-semibold text-navy-900 mb-2">Collect interactions</h3>
+        <p class="text-sm text-navy-600 leading-relaxed">Aggregate large-scale model–dataset evaluations from public leaderboards and curated sources into a unified <code class="text-xs bg-navy-100 text-navy-800 px-1.5 py-0.5 rounded">(model, dataset, task, metric, score)</code> corpus.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-7 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-11 h-11 rounded-xl bg-accent-50 text-accent-600 flex items-center justify-center mb-5">
+          <i class="fa-solid fa-diagram-project text-lg"></i>
+        </div>
+        <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-2">Stage 2</p>
+        <h3 class="text-lg font-semibold text-navy-900 mb-2">Learn compatibility</h3>
+        <p class="text-sm text-navy-600 leading-relaxed">A multi-view ranker fuses learned IDs, name tokens, model-card descriptions, size buckets and architecture families — trained with a listwise + pairwise + pointwise objective and ID dropout for cold-start generalisation.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-7 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-11 h-11 rounded-xl bg-accent-50 text-accent-600 flex items-center justify-center mb-5">
+          <i class="fa-solid fa-bullseye text-lg"></i>
+        </div>
+        <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-2">Stage 3</p>
+        <h3 class="text-lg font-semibold text-navy-900 mb-2">Recommend candidates</h3>
+        <p class="text-sm text-navy-600 leading-relaxed">Given a new task or dataset (text + metadata), ModelLens returns a ranked Top-K candidate pool — no forward passes on the target task required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== ATLAS =================== -->
+<section class="py-20 md:py-24 px-6 bg-white">
+  <div class="max-w-6xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">What it learns</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-3">The model–dataset atlas</h2>
+    <p class="text-navy-600 max-w-3xl mb-12 text-[15px]">Same projection, different latent sources. Text similarity gives a tangle; interaction-aware learning recovers family and domain structure on its own.</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <figure class="bg-navy-50/40 rounded-2xl p-5 border border-navy-100">
+        <img src="figures/atlas_semantic.jpg" alt="Atlas — semantic-only baseline" class="w-full rounded-xl">
+        <figcaption class="mt-4">
+          <p class="font-semibold text-navy-900 mb-1">Semantic-only baseline</p>
+          <p class="text-sm text-navy-600 leading-relaxed">Frozen text-embedding similarity between model cards and dataset descriptions — what a metadata-only retriever sees. Families heavily overlap in the centre.</p>
+        </figcaption>
+      </figure>
+      <figure class="bg-accent-50/40 rounded-2xl p-5 border border-accent-100">
+        <img src="figures/atlas_full.jpg" alt="Atlas — full ModelLens learned latents" class="w-full rounded-xl">
+        <figcaption class="mt-4">
+          <p class="font-semibold text-navy-900 mb-1 flex items-center gap-2">
+            ModelLens <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-accent-600 text-white">ours</span>
+          </p>
+          <p class="text-sm text-navy-600 leading-relaxed">Same projection, learned latents. Speech (orange) detaches cleanly; retrieval embedders form their own arc; vision and multimodal models bridge the text–vision boundary.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- =================== DEMO =================== -->
+<section id="demo" class="py-20 md:py-24 px-6 bg-navy-900 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-30 pointer-events-none"
+       style="background:radial-gradient(circle at 25% 15%, rgba(6,182,212,0.45), transparent 50%), radial-gradient(circle at 80% 85%, rgba(6,182,212,0.25), transparent 55%);"></div>
+  <div class="max-w-6xl mx-auto relative">
+    <p class="text-accent-400 font-semibold text-xs uppercase section-eyebrow mb-3">Live demo</p>
+    <h2 class="text-3xl md:text-4xl font-bold mb-3">Try ModelLens in your browser</h2>
+    <p class="text-navy-200 max-w-3xl mb-10 text-[15px] leading-relaxed">
+      Type a task description, and ModelLens returns a ranked pool of candidate foundation models from the open-source ecosystem.
+    </p>
+
+    <div class="rounded-2xl overflow-hidden border border-accent-500/30 shadow-2xl bg-white">
+      <div class="w-full bg-navy-50 relative" style="height: min(80vh, 760px); min-height: 560px;">
+        <iframe
+          src="https://luisrui-modellens.hf.space"
+          title="ModelLens — HuggingFace Space"
+          class="absolute inset-0 w-full h-full"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads">
+        </iframe>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center gap-4">
+      <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-500 text-white text-sm font-medium hover:bg-accent-400 transition">
+        <span class="text-base leading-none">🤗</span> Open on HuggingFace Space
+        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+      </a>
+      <p class="text-xs text-navy-300">If the embed is slow to wake up, the Space may be cold-starting from sleep.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =================== EXAMPLE RECOMMENDATIONS =================== -->
+<section class="py-20 md:py-24 px-6 bg-white">
+  <div class="max-w-6xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">Examples</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-3">Top-K candidates, at a glance</h2>
+    <p class="text-navy-600 max-w-3xl mb-12 text-[15px]">A few illustrative recommendations across task domains. The live demo returns full ranked Top-K pools with scores.</p>
+
+    <div class="grid md:grid-cols-2 gap-5">
+
+      <article class="bg-white rounded-2xl p-6 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-1">Multi-hop QA</p>
+            <h3 class="text-xl font-semibold text-navy-900">HotpotQA</h3>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-navy-100 text-navy-700">Text</span>
+        </div>
+        <ol class="space-y-2.5">
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">1</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">LLaMA-3.3-70B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">70B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">2</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">GPT-OSS-20B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">20B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">3</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Qwen3-32B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">32B</span>
+          </li>
+        </ol>
+      </article>
+
+      <article class="bg-white rounded-2xl p-6 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-1">Multimodal QA</p>
+            <h3 class="text-xl font-semibold text-navy-900">MMMU</h3>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-navy-100 text-navy-700">Vision-Language</span>
+        </div>
+        <ol class="space-y-2.5">
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">1</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Gemini-2.5-Pro</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">VLM</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">2</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Qwen3-VL-235B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">235B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">3</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Step-3-VL-108B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">108B</span>
+          </li>
+        </ol>
+      </article>
+
+      <article class="bg-white rounded-2xl p-6 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-1">Math reasoning</p>
+            <h3 class="text-xl font-semibold text-navy-900">GSM8K</h3>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-navy-100 text-navy-700">Math</span>
+        </div>
+        <ol class="space-y-2.5">
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">1</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Qwen2.5-Math-72B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">72B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">2</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">DeepSeek-Math-7B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">7B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">3</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">LLaMA-3.1-70B-Instruct</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">70B</span>
+          </li>
+        </ol>
+      </article>
+
+      <article class="bg-white rounded-2xl p-6 border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-[11px] uppercase section-eyebrow font-semibold text-accent-600 mb-1">Code generation</p>
+            <h3 class="text-xl font-semibold text-navy-900">HumanEval</h3>
+          </div>
+          <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-navy-100 text-navy-700">Code</span>
+        </div>
+        <ol class="space-y-2.5">
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">1</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">DeepSeek-Coder-V2</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">236B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">2</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Qwen2.5-Coder-32B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">32B</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-md bg-accent-50 text-accent-700 text-xs font-bold flex items-center justify-center">3</span>
+            <span class="font-mono text-sm text-navy-800 flex-1 truncate">Code-LLaMA-70B</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-navy-100 text-navy-600 font-mono">70B</span>
+          </li>
+        </ol>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- =================== RESOURCES =================== -->
+<section class="py-16 md:py-20 px-6 bg-navy-50/40">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3 text-center">Resources</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-10 text-center">Find ModelLens online</h2>
+    <div class="grid md:grid-cols-2 gap-5">
+      <a href="https://github.com/luisrui/ModelLens" target="_blank" rel="noopener"
+         class="group flex items-center gap-4 p-6 bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-12 h-12 rounded-xl bg-navy-900 text-white flex items-center justify-center shrink-0">
+          <i class="fa-brands fa-github text-2xl"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-[11px] uppercase section-eyebrow font-semibold text-navy-500">GitHub</p>
+          <p class="font-mono text-[13px] md:text-sm text-accent-700 group-hover:text-accent-900 truncate">github.com/luisrui/ModelLens</p>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square text-navy-300 group-hover:text-accent-600 transition"></i>
+      </a>
+      <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener"
+         class="group flex items-center gap-4 p-6 bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-12 h-12 rounded-xl bg-accent-600 text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-globe text-2xl"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-[11px] uppercase section-eyebrow font-semibold text-navy-500">Demo</p>
+          <p class="font-mono text-[13px] md:text-sm text-accent-700 group-hover:text-accent-900 truncate">huggingface.co/spaces/luisrui/ModelLens</p>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square text-navy-300 group-hover:text-accent-600 transition"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- =================== CITATION =================== -->
+<section class="py-20 md:py-24 px-6 bg-white">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">Cite</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-6">Citation</h2>
+    <p class="text-navy-600 mb-6 text-[15px]">If you find ModelLens useful in your research, please cite:</p>
+
+    <div class="relative">
+      <pre class="bg-navy-900 text-navy-100 rounded-2xl p-6 pr-20 overflow-x-auto text-sm leading-relaxed shadow-lg"><code id="bibtex">@article{cai2026modellens,
+  title   = {{ModelLens}: Finding the Best for Your Task from Myriads of Models},
+  author  = {Cai, Rui and Mo, Weijie Jacky and Wen, Xiaofei and Ma, Qiyao
+             and Zhu, Wenhui and Chen, Xiwen and Chen, Muhao and Zhao, Zhe},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre>
+      <button id="copy-bib"
+              class="absolute top-4 right-4 px-3 py-1.5 rounded-md bg-navy-700 hover:bg-navy-600 text-xs font-medium text-white transition">
+        Copy
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FOOTER =================== -->
+<footer class="py-10 px-6 border-t border-navy-100 bg-white">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <p class="text-sm text-navy-500">© 2026 Rui Cai · Released under the MIT License.</p>
+    <div class="flex items-center gap-5 text-navy-500 text-sm">
+      <a href="https://github.com/luisrui/ModelLens" target="_blank" rel="noopener" class="hover:text-accent-600 transition"><i class="fa-brands fa-github"></i> Code</a>
+      <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener" class="hover:text-accent-600 transition"><i class="fa-solid fa-globe"></i> Demo</a>
+      <a href="paper/ModelLens.pdf" class="hover:text-accent-600 transition"><i class="fa-solid fa-file-pdf"></i> Paper</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('copy-bib')?.addEventListener('click', function () {
+    const txt = document.getElementById('bibtex').innerText;
+    navigator.clipboard.writeText(txt).then(() => {
+      const btn = this;
+      const old = btn.innerText;
+      btn.innerText = 'Copied';
+      btn.classList.add('bg-accent-500');
+      setTimeout(() => { btn.innerText = old; btn.classList.remove('bg-accent-500'); }, 1500);
+    });
+  });
+</script>
+</body>
+</html>
