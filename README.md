@@ -86,7 +86,7 @@ datasets it has been evaluated on, colored by **task domain**.
   </tr>
   <tr>
     <td><img src="figures/teaser_figure/atlas_A_semantic_only.png" alt="Atlas — semantic only" /></td>
-    <td><img src="figures/teaser_figure/atlas_A_full_data.png" alt="Atlas — full data (ModelLens)" /></td>
+    <td><img src="figures/teaser_figure/atlas_B_full_data.png" alt="Atlas — full data (ModelLens)" /></td>
   </tr>
 </table>
 
