@@ -81,29 +81,34 @@ datasets it has been evaluated on, colored by **task domain**.
 
 <table>
   <tr>
-    <td align="center" width="50%"><sub>Atlas A — model embeddings only</sub></td>
-    <td align="center" width="50%"><sub>Atlas B — model–dataset interaction atlas</sub></td>
+    <td align="center" width="50%"><sub><b>Semantic-only baseline</b> — atlas built from frozen text-embedding similarity between model cards and dataset descriptions (i.e. what a metadata-only retriever sees).</sub></td>
+    <td align="center" width="50%"><sub><b>ModelLens (full data)</b> — the same projection, but using the learned latents that absorb 1.62M co-evaluation records.</sub></td>
   </tr>
   <tr>
-    <td><img src="figures/teaser_figure/atlas_A_full_data.png" alt="Atlas A" /></td>
-    <td><img src="figures/teaser_figure/atlas_B_full_data.png" alt="Atlas B" /></td>
+    <td><img src="figures/teaser_figure/atlas_A_semantic_only.png" alt="Atlas — semantic only" /></td>
+    <td><img src="figures/teaser_figure/atlas_A_full_data.png" alt="Atlas — full data (ModelLens)" /></td>
   </tr>
 </table>
 
-Two patterns are striking:
+The two atlases tell the same story from opposite ends:
 
-1. **Family structure emerges from performance, not from text.** Speech
-   models (orange) sharply detach from text LLMs (purple); retrieval
-   embedders (green) form their own arc; vision and multimodal models
-   bridge the vision/text continents. The model never sees these family
-   labels — they are *recovered* from co-evaluation patterns.
-2. **Models and datasets share the same geometry.** A new MMMU-like
-   dataset lands among multimodal LMs; a new GLUE-like benchmark lands
-   among encoder LMs. Recommendation reduces to nearest-neighbor lookup
-   in this learned space.
+* The **semantic-only** atlas (left) shows that text similarity alone
+  produces a tangled mass: families overlap heavily in the centre, and
+  many task-relevant distinctions (e.g. encoder-only LMs vs decoder-only
+  LMs, multimodal vs vision-only) collapse together because their
+  *descriptions* read similarly.
+* The **full-data** atlas (right), driven by actual evaluation
+  interactions, untangles this geometry: speech models (orange) detach
+  cleanly from the text continent, retrieval embedders (green) form
+  their own arc, and vision / multimodal models bridge the vision–text
+  boundary. Family structure is **recovered from co-evaluation patterns**,
+  not supplied as a label.
 
-This is the structure the ranker exploits — and the structure that purely
-text-embedding baselines fail to capture.
+The practical consequence is the right panel of the teaser: in the learned
+space, *nearest-neighbor* in fact means *task-appropriate*, while in the
+semantic-only space it means *text-similar*. ModelLens's recommendation
+quality is, in large part, a downstream effect of having the right
+geometry to begin with.
 
 ---
 
