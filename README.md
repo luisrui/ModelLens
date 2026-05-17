@@ -1,5 +1,15 @@
 # ModelLens: Finding the Best Model for Your Task from Myriads of Models
 
+<p align="center">
+  <a href="https://arxiv.org/pdf/2605.07075" target="_blank">📄 Paper</a>
+  &nbsp;|&nbsp;
+  <a href="https://luisrui.github.io/ModelLens/" target="_blank">🌐 Project Page</a>
+  &nbsp;|&nbsp;
+  <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank">🤗 Demo</a>
+  &nbsp;|&nbsp;
+  <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank">🗺️ Atlas Graph</a>
+</p>
+
 > *A unified ranking framework that learns directly from public leaderboard
 > interactions to recommend the best pretrained model for an unseen
 > dataset — without ever running a candidate on the target task.*
