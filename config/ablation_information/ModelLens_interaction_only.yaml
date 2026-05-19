@@ -1,13 +1,12 @@
-# Information-source ablation -- (3) STRUCTURAL-ONLY
-# Keep:   model size, model family, task, metric
-# Remove: model ID, dataset ID, model name, model description,
-#         dataset description
+# Information-source ablation -- (2) INTERACTION-ONLY
+# Keep:   model ID, dataset ID, task, metric
+# Remove: model name, model description, dataset description, model size,
+#         model family, structural prior
 #
-# Tests whether the recommendation problem can largely be solved by simple
-# scaling-law and family effects. Expect: captures coarse global trends but
-# weak fine-grained ranking quality, especially weaker on dataset-specific
-# specialization. Important to show the model is not simply learning
-# "bigger models are better".
+# Tests whether leaderboard interaction memorization alone is sufficient.
+# Expect: strong completion results on seen datasets/models, significant
+# degradation on unseen datasets/models. Demonstrates that semantic
+# information is necessary for cold-start generalization.
 
 # General
 device: 0
@@ -27,7 +26,7 @@ seed: 2025
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: ablation_info_structural_only
+trail_name: ablation_info_interaction_only
 
 # Training
 start_epoch: 0
@@ -52,30 +51,30 @@ lambda_pair: 1.0
 alpha: 3.0
 size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 3, 7, 14, 35, 70, 100, 1000]
 
-##### Model Information (structural-only)
+##### Model Information (interaction-only)
 use_id_emb: True
 model_dim: 1536
 token_dim: 512
 
-# --- information-source flags (all model/dataset textual + ID off) ---
-use_model_id_emb: False        # << OFF
+# --- information-source flags ---
+use_model_id_emb: True         # << ON
 use_model_name_emb: False      # << OFF
 use_model_desc_emb: False      # << OFF
-use_dataset_id_emb: False      # << OFF
+use_dataset_id_emb: True       # << ON
 use_dataset_desc_emb: False    # << OFF
 
-# --- structural priors / features (all ON) ---
-use_size_feature: True
-use_size_prior: True
+# --- structural priors / features (all OFF) ---
+use_size_feature: False
+use_size_prior: False
 size_dim: 64
-use_family_prior: True
+use_family_prior: False
 family_dim: 64
 
 ##### Model Description (loaded but unused; safe defaults)
 model_desp_emb_dim: 1536
 model_desp_emb_path: data/unified_augmented/model2desp_embeddings.npz
 
-##### Dataset Information (kept for pipeline plumbing only)
+##### Dataset Information
 use_dataset_id_as_desp: True
 dataset_desp_dim: 1
 dataset_id_emb_dim: 256
@@ -86,10 +85,12 @@ task_dim: 256
 use_metric_feature: True
 
 # Model
-model_name: MLPMetricFull
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
-id_dropout_rate: 0.0  # no IDs to drop
+# ID dropout disabled: with no fallback semantic features, masking IDs
+# would force the backbone to fall back on task/metric only and learn nothing.
+id_dropout_rate: 0.0
 
 # Evaluation
 topk: [1, 10, 30, 50]

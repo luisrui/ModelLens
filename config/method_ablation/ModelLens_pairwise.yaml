@@ -1,6 +1,6 @@
-# Ablation: pairwise + pointwise loss (no listwise)
-# Base: MLPMetricFull_unified_augmented.yaml (ensemble = listwise + pairwise + pointwise)
-# Change: loss_type ensemble -> pairwise_pointwise
+# Ablation: pairwise loss only (no listwise, no pointwise)
+# Base: FinalModel_unified_augmented.yaml (ensemble = listwise + pairwise + pointwise)
+# Change: loss_type ensemble -> pairwise
 
 # General Setting
 device: 0
@@ -20,15 +20,14 @@ seed: 2025
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: method_ablation_pairwise_pointwise
+trail_name: method_ablation_pairwise
 
 # Training Setting
 start_epoch: 0
 checkpoint_path: ""
 is_train: True
 is_ood: False
-loss_type: pairwise_pointwise
-point_loss_weight: 0.1
+loss_type: pairwise
 early_stop: 20
 num_epochs: 1000
 batch_size: 8
@@ -62,7 +61,7 @@ dataset_desp_emb_dim: 1536
 task_dim: 256
 
 # Ranking Model Setting
-model_name: MLPMetricFull
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
 

@@ -1,24 +1,21 @@
-# Modern-Cohort Family Holdout (family prior ON).
-# Test set = all rows from 13 held-out modern LLM families:
-#   qwen, llama, mistral, gemma, phi, deepseek, yi, falcon, granite,
-#   aya, olmo, zephyr, solar
-# Train+val = remaining (non-modern) rows; val is model-disjoint within train.
-# Build:  python scripts/data_process/build_family_holdout_split.py
-# Launch: bash scripts/ablation_family/train_holdout_modern.sh
+# Size ablation -- (1) FULL: size in backbone + size in prior head.
+# Identical setup to FinalModel_unified_augmented.yaml; rebuilt with the
+# current code/seed so the three ablation runs are directly comparable.
+#
+# Launch (4-GPU DDP):
+#   bash scripts/ablation_size/train_full.sh
 
 # General Setting
 device: 0
 use_data_parallel: False
-device_ids: [0, 1, 2]
+device_ids: [0, 1, 2, 3]
 use_ddp: True
 ddp_find_unused_parameters: False
 num_workers: 0
 pin_memory: False
 persistent_workers: False
-data_name: unified_augmented_familysplit_modern
-# Family-holdout test IS our OOD signal; reuse the same split for the
-# loader's ood_mode slot so we don't need a separate new-dataset dir.
-ood_split_mode: test
+data_name: unified_augmented
+ood_split_mode: new_dataset_evaluation
 test_split_mode: val
 seed: 2025
 
@@ -26,7 +23,7 @@ seed: 2025
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: family_holdout_modern_full
+trail_name: ablation_size_full
 
 # Training
 start_epoch: 0
@@ -55,13 +52,10 @@ size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6
 use_id_emb: True
 model_dim: 1536
 token_dim: 512
-# --- size pathways: both ON (matches Final_model_randomMasking baseline) ---
-use_size_feature: True
-use_size_prior: True
+# --- size feature controls (this run: BOTH on) ---
+use_size_feature: True       # size embedding present in residual backbone
+use_size_prior: True         # size also drives an additive prior bias
 size_dim: 64
-# --- family pathway: ON. Held-out family ids exist in the vocab but
-#     receive no gradient during training -> tests whether the rest of
-#     the model can compensate when the family prior is uninformative. ---
 use_family_prior: True
 family_dim: 64
 
@@ -77,7 +71,7 @@ dataset_desp_emb_dim: 1536
 task_dim: 256
 
 # Ranking Model
-model_name: MLPMetricFull
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
 id_dropout_rate: 0.1

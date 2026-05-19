@@ -22,7 +22,7 @@ def batch_logq(size_id: torch.LongTensor, n_size_bucket: int, eps: float = 1e-6)
     return logq_all.gather(0, size_id)                                  # [B]
 
 # ---- module-level name-alias / desc-matrix helpers ---------------------------
-# Extracted from internal ranker variants so MLPMetricFull can stand alone.
+# Extracted from internal ranker variants so ModelLens can stand alone.
 
 def _normalize_name(name: str) -> str:
     return re.sub(r"\s+", " ", str(name).strip().lower())
@@ -101,7 +101,7 @@ def _build_desc_matrix(model2id: dict, emb_path: str, emb_dim: int) -> torch.Ten
     return torch.from_numpy(mat)
 
 
-@register_model("MLP", aliases=["mlp"])
+# Internal base class — not exposed in the public model registry.
 class MLP(nn.Module):
     def __init__(self, args):
         super().__init__()
@@ -437,7 +437,7 @@ class MLP(nn.Module):
         return scores.squeeze(0)
 
 
-@register_model("MLPMetric", aliases=["mlp_metric", "mlp_with_metric"])
+# Internal base class — not exposed in the public model registry.
 class MLPMetric(MLP):
     """
     MLP variant with metric embedding lookup.
@@ -609,8 +609,8 @@ class MLPMetric(MLP):
 
 
 
-@register_model("MLPMetricFull", aliases=["mlp_metric_full"])
-class MLPMetricFull(MLPMetric):
+@register_model("ModelLens", aliases=["modellens", "MLPMetricFull"])
+class ModelLens(MLPMetric):
     """
     Full-feature model using ALL available features.
 
@@ -625,7 +625,7 @@ class MLPMetricFull(MLPMetric):
 
     Fixed features:
       - task_id:      learned embedding  [task_dim]
-      - metric_id:    learned embedding  [metric_dim]   (from MLPMetric)
+      - metric_id:    learned embedding  [metric_dim]
       - size_prior:   learned embedding  [size_dim]     (prior head)
       - family_prior: learned embedding  [family_dim]   (prior head)
 
@@ -660,7 +660,7 @@ class MLPMetricFull(MLPMetric):
             args.use_size_prior = False  # ensure parent doesn't think size_prior is on
 
         # Information-source ablation flags. Each gates one feature stream so
-        # the same MLPMetricFull architecture can express Semantic-only,
+        # the same ModelLens architecture can express Semantic-only,
         # Interaction-only, Structural-only, and combination variants.
         self.use_model_id_emb   = bool(getattr(args, "use_model_id_emb",   True))
         self.use_model_name_emb = bool(getattr(args, "use_model_name_emb", True))
@@ -803,7 +803,7 @@ class MLPMetricFull(MLPMetric):
 
         if not os.path.exists(train_vecs_path) or not os.path.exists(train_ds_path):
             print(
-                f"[MLPMetricFull] warning: dataset description files not found "
+                f"[ModelLens] warning: dataset description files not found "
                 f"({train_vecs_path}); using zeros."
             )
             return torch.from_numpy(mat)

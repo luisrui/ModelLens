@@ -1,9 +1,6 @@
-# Size ablation -- (3) NO SIZE FEATURE: size embedding fully removed
-# from BOTH the residual backbone and the prior head. Family prior stays
-# active so the prior path is still meaningful.
-#
-# Launch (4-GPU DDP):
-#   bash scripts/ablation_size/train_no_size_feature.sh
+# Ablation: listwise + pointwise loss (no pairwise)
+# Base: FinalModel_unified_augmented.yaml (ensemble = listwise + pairwise + pointwise)
+# Change: loss_type ensemble -> listwise_pointwise
 
 # General Setting
 device: 0
@@ -19,18 +16,18 @@ ood_split_mode: new_dataset_evaluation
 test_split_mode: val
 seed: 2025
 
-# Wandb
+# Wandb Setting
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: ablation_size_no_size_feature
+trail_name: method_ablation_listwise_pointwise
 
-# Training
+# Training Setting
 start_epoch: 0
 checkpoint_path: ""
 is_train: True
 is_ood: False
-loss_type: ensemble
+loss_type: listwise_pointwise
 point_loss_weight: 0.1
 early_stop: 20
 num_epochs: 1000
@@ -40,44 +37,37 @@ learning_rate: 0.001
 weight_decay: 0.0001
 tau: 10.0
 
-# Ensemble
-lambda_list: 0.5
-lambda_pair: 1.0
-
-# Data
+# Data Setting
 alpha: 3.0
 size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 3, 7, 14, 35, 70, 100, 1000]
 
-# Model Information
+##### Model Information (ALL model features)
 use_id_emb: True
 model_dim: 1536
 token_dim: 512
-# --- size feature controls (this run: BOTH off) ---
-use_size_feature: False      # size dropped from backbone concat
-use_size_prior: False        # cascaded off (no size = no size prior)
-size_dim: 64                 # still declared so num_size_buckets math works
-use_family_prior: True       # family prior remains active (family-only prior head)
+use_size_prior: True
+size_dim: 64
+use_family_prior: True
 family_dim: 64
 
-# Model Description (frozen)
+##### Model Description (pre-computed, frozen)
 model_desp_emb_dim: 1536
 model_desp_emb_path: data/unified_augmented/model2desp_embeddings.npz
 
-# Dataset Information
+##### Dataset Information (BOTH dataset ID + description)
 use_dataset_id_as_desp: True
 dataset_desp_dim: 1
 dataset_id_emb_dim: 256
 dataset_desp_emb_dim: 1536
 task_dim: 256
 
-# Ranking Model
-model_name: MLPMetricFull
+# Ranking Model Setting
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
-id_dropout_rate: 0.1
 
-# Evaluation
-topk: [1, 10, 30, 50]
+# Evaluation Setting
+topk: [1,3,5,7,10, 30, 50, 70, 100]
 margin_eps: 0.02
 val_eval_target_models_all_datasets: False
 val_eval_fixed_backbones: False

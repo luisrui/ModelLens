@@ -1,8 +1,8 @@
-# Ablation: pairwise loss only (no listwise, no pointwise)
-# Base: MLPMetricFull_unified_augmented.yaml (ensemble = listwise + pairwise + pointwise)
-# Change: loss_type ensemble -> pairwise
+# Information-source ablation -- (4c) INTERACTION + STRUCTURAL (no semantic)
+# Keep:   model ID, dataset ID, model size, model family, structural prior,
+#         task, metric
+# Remove: model name, model description, dataset description
 
-# General Setting
 device: 0
 use_data_parallel: False
 device_ids: [0, 1, 2, 3]
@@ -16,18 +16,17 @@ ood_split_mode: new_dataset_evaluation
 test_split_mode: val
 seed: 2025
 
-# Wandb Setting
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: method_ablation_pairwise
+trail_name: ablation_info_interaction_structural
 
-# Training Setting
 start_epoch: 0
 checkpoint_path: ""
 is_train: True
-is_ood: False
-loss_type: pairwise
+is_ood: True
+loss_type: ensemble
+point_loss_weight: 0.1
 early_stop: 20
 num_epochs: 1000
 batch_size: 8
@@ -36,37 +35,45 @@ learning_rate: 0.001
 weight_decay: 0.0001
 tau: 10.0
 
-# Data Setting
+lambda_list: 0.5
+lambda_pair: 1.0
+
 alpha: 3.0
 size_bucket: [0.001, 0.003, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 3, 7, 14, 35, 70, 100, 1000]
 
-##### Model Information (ALL model features)
 use_id_emb: True
 model_dim: 1536
 token_dim: 512
+
+use_model_id_emb: True
+use_model_name_emb: False
+use_model_desc_emb: False
+use_dataset_id_emb: True
+use_dataset_desc_emb: False
+
+use_size_feature: True
 use_size_prior: True
 size_dim: 64
 use_family_prior: True
 family_dim: 64
 
-##### Model Description (pre-computed, frozen)
 model_desp_emb_dim: 1536
 model_desp_emb_path: data/unified_augmented/model2desp_embeddings.npz
 
-##### Dataset Information (BOTH dataset ID + description)
 use_dataset_id_as_desp: True
 dataset_desp_dim: 1
 dataset_id_emb_dim: 256
 dataset_desp_emb_dim: 1536
 task_dim: 256
 
-# Ranking Model Setting
-model_name: MLPMetricFull
+use_metric_feature: True
+
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
+id_dropout_rate: 0.0
 
-# Evaluation Setting
-topk: [1,3,5,7,10, 30, 50, 70, 100]
+topk: [1, 10, 30, 50]
 margin_eps: 0.02
 val_eval_target_models_all_datasets: False
 val_eval_fixed_backbones: False

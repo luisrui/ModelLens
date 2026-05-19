@@ -30,7 +30,7 @@ def train_mlp_listPointwise(args, model, train_data_loader, valid_data_loader, c
         cfg = dict(vars(args))
         if 'device' in cfg:
             cfg['device'] = str(cfg['device'])
-        run_name = f"{getattr(args, 'trail_name', 'trail')}-{getattr(args, 'model_name', 'MLP')}"
+        run_name = f"{getattr(args, 'trail_name', 'trail')}-{getattr(args, 'model_name', 'ModelLens')}"
         wandb_id = getattr(args, "wandb_id", None)
         try:
             init_kwargs = dict(
@@ -201,7 +201,7 @@ def train_mlp_listwise(args, model, train_data_loader, valid_data_loader, criter
         cfg = dict(vars(args))
         if 'device' in cfg:
             cfg['device'] = str(cfg['device'])
-        run_name = f"{getattr(args, 'trail_name', 'trail')}-{getattr(args, 'model_name', 'MLP')}"
+        run_name = f"{getattr(args, 'trail_name', 'trail')}-{getattr(args, 'model_name', 'ModelLens')}"
         try:
             run = wandb.init(
                 project=getattr(args, 'wandb_project', 'ModelProfile'),

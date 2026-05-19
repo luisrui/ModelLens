@@ -6,19 +6,20 @@ from .train import *
 def load_procedure_by_name(args):
     """Dispatch the (train_fn, test_fn, procedure_tag) for a given config.
 
-    ModelLens supports a single backbone family (MLP and its
-    metric-conditioned variants) and three loss regimes from the paper:
-    listwise, pairwise, and the full ensemble (listwise + pairwise +
-    pointwise).  Combinations such as ``listwise_pointwise`` and
-    ``pairwise_pointwise`` reproduce ablation results in Section 4.4.
+    ModelLens supports three loss regimes from the paper: listwise,
+    pairwise, and the full ensemble (listwise + pairwise + pointwise).
+    Combinations such as ``listwise_pointwise`` and ``pairwise_pointwise``
+    reproduce ablation results in Section 4.4.
     """
     name = args.model_name
-    mlp_family = {"MLP", "MLPMetric", "MLPMetricFull"}
+    # "MLPMetricFull" kept as a legacy alias so old configs / checkpoints
+    # written before the rename still load.
+    valid_names = {"ModelLens", "MLPMetricFull"}
     loss_type = args.loss_type
 
-    if name not in mlp_family:
+    if name not in valid_names:
         raise ValueError(
-            f"Unknown model name: {name}. Supported: {sorted(mlp_family)}"
+            f"Unknown model name: {name}. Supported: {sorted(valid_names)}"
         )
 
     if loss_type in ("ensemble", "listwise_pairwise"):

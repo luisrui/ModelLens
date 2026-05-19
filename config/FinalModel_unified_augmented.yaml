@@ -68,7 +68,7 @@ dataset_desp_emb_dim: 1536
 task_dim: 256
 
 # Ranking Model Setting
-model_name: MLPMetricFull
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
 

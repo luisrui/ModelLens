@@ -272,12 +272,12 @@ All hyperparameters live in YAML. Key knobs (see
 
 | Field | Meaning |
 |---|---|
-| `model_name` | One of `MLP`, `MLPMetric`, `MLPMetricFull` (the paper model). |
+| `model_name` | `ModelLens` (the paper model). |
 | `loss_type` | `ensemble`, `listwise`, `pairwise`, `pairwise_pointwise`, `listwise_pointwise`, `listwise_pairwise`. |
 | `id_dropout_rate` | Probability of masking a learned model/dataset ID with `[UNK]`. |
 | `use_size_prior`, `use_family_prior` | Toggle the structural-prior head terms. |
 | `use_size_feature` | If `False`, drops the size embedding from both backbone and prior. |
-| `use_dataset_id_as_desp` | When `True`, the dataloader passes a global dataset id in the dataset-description slot, which the model intercepts to look up *both* a learned dataset embedding and a frozen description embedding. Required by `MLPMetricFull`. |
+| `use_dataset_id_as_desp` | When `True`, the dataloader passes a global dataset id in the dataset-description slot, which the model intercepts to look up *both* a learned dataset embedding and a frozen description embedding. Required by ModelLens. |
 | `lambda_list`, `lambda_pair`, `point_loss_weight` | Loss weights `λ_list`, `λ_pair`, `λ_point`. |
 | `tau` | Initial value of the learnable temperature `τ`. |
 | `topk` | List of `K` values for Hit@K / NDCG@K / Rec@K. |

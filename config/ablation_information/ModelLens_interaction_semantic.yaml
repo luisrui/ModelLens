@@ -1,7 +1,7 @@
-# Information-source ablation -- (4c) INTERACTION + STRUCTURAL (no semantic)
-# Keep:   model ID, dataset ID, model size, model family, structural prior,
+# Information-source ablation -- (4b) INTERACTION + SEMANTIC (no structural)
+# Keep:   model ID, dataset ID, model name, model description, dataset description,
 #         task, metric
-# Remove: model name, model description, dataset description
+# Remove: model size, model family, structural prior
 
 device: 0
 use_data_parallel: False
@@ -19,7 +19,7 @@ seed: 2025
 use_wandb: True
 wandb_project: ModelProfile
 wandb_entity: ruicai-ucdavis
-trail_name: ablation_info_interaction_structural
+trail_name: ablation_info_interaction_semantic
 
 start_epoch: 0
 checkpoint_path: ""
@@ -46,15 +46,15 @@ model_dim: 1536
 token_dim: 512
 
 use_model_id_emb: True
-use_model_name_emb: False
-use_model_desc_emb: False
+use_model_name_emb: True
+use_model_desc_emb: True
 use_dataset_id_emb: True
-use_dataset_desc_emb: False
+use_dataset_desc_emb: True
 
-use_size_feature: True
-use_size_prior: True
+use_size_feature: False
+use_size_prior: False
 size_dim: 64
-use_family_prior: True
+use_family_prior: False
 family_dim: 64
 
 model_desp_emb_dim: 1536
@@ -68,10 +68,10 @@ task_dim: 256
 
 use_metric_feature: True
 
-model_name: MLPMetricFull
+model_name: ModelLens
 hidden_dim: 512
 dropout_rate: 0.02
-id_dropout_rate: 0.0
+id_dropout_rate: 0.1
 
 topk: [1, 10, 30, 50]
 margin_eps: 0.02
