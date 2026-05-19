@@ -134,7 +134,7 @@ ModelLens/
 │   └── ablation_family/                       # family-prior / family-holdout ablations
 ├── module/
 │   ├── data/        # leaderboard corpus loader, name tokenizer
-│   ├── model/       # MLP backbone, MLPMetric, MLPMetricFull (the paper model)
+│   ├── model/       # ModelLens (the paper model)
 │   ├── procedure/   # listwise / pairwise / pointwise / ensemble training loops
 │   └── utils/       # metrics (Kendall-w τ, NDCG@K, Hit@K, Rec@K), family extractor
 ├── src/main.py      # entry point: parse YAML, build model, train, evaluate
