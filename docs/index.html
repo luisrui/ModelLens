@@ -114,8 +114,8 @@
          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
         <i class="fa-solid fa-play"></i> Demo
       </a>
-      <a href="#atlas-live"
-         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
+      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition shadow-sm">
         <span class="text-base leading-none">🗺️</span> Atlas Graph
       </a>
       <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener"
@@ -243,6 +243,28 @@
         </figcaption>
       </figure>
     </div>
+
+    <!-- Interactive Atlas callout -->
+    <div class="mt-10 rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 via-white to-accent-50 p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
+      <div class="w-14 h-14 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-md">
+        <i class="fa-solid fa-map text-2xl"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-[11px] uppercase section-eyebrow font-semibold text-purple-700 mb-1">Interactive atlas</p>
+        <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-1">Explore the full atlas in your browser</h3>
+        <p class="text-sm text-navy-600 leading-relaxed">
+          A zoomable, searchable map of <span class="font-semibold text-navy-900">13.6k models</span> and
+          <span class="font-semibold text-navy-900">9k datasets</span>, positioned by ModelLens's learned
+          compatibility geometry. Click any node to see its top-K compatible counterparts ranked by real
+          benchmark performance.
+        </p>
+      </div>
+      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition shadow-sm shrink-0">
+        <span class="text-base leading-none">🗺️</span> Open Atlas
+        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -277,44 +299,6 @@
         <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
       </a>
       <p class="text-xs text-navy-300">If the embed is slow to wake up, the Space may be cold-starting from sleep.</p>
-    </div>
-  </div>
-</section>
-
-<!-- =================== ATLAS LIVE =================== -->
-<section id="atlas-live" class="py-20 md:py-24 px-6 bg-navy-900 text-white relative overflow-hidden border-t border-navy-800">
-  <div class="absolute inset-0 opacity-30 pointer-events-none"
-       style="background:radial-gradient(circle at 75% 20%, rgba(168,85,247,0.40), transparent 50%), radial-gradient(circle at 20% 80%, rgba(6,182,212,0.25), transparent 55%);"></div>
-  <div class="max-w-6xl mx-auto relative">
-    <p class="text-accent-400 font-semibold text-xs uppercase section-eyebrow mb-3">Interactive atlas</p>
-    <h2 class="text-3xl md:text-4xl font-bold mb-3">Explore the model–dataset universe</h2>
-    <p class="text-navy-200 max-w-3xl mb-10 text-[15px] leading-relaxed">
-      A zoomable, searchable map of <span class="font-semibold text-white">13.6k models</span> and
-      <span class="font-semibold text-white">9k datasets</span>, positioned by ModelLens's learned
-      compatibility geometry. Click any node to see its top-K compatible counterparts ranked by real
-      benchmark performance.
-    </p>
-
-    <div class="rounded-2xl overflow-hidden border border-accent-500/30 shadow-2xl bg-navy-950">
-      <div class="w-full bg-navy-950 relative" style="height: min(80vh, 760px); min-height: 560px;">
-        <iframe
-          src="https://luisrui-modellens-atlas.hf.space"
-          title="ModelLens Atlas — Interactive Compatibility Map"
-          class="absolute inset-0 w-full h-full"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads">
-        </iframe>
-      </div>
-    </div>
-
-    <div class="mt-6 flex flex-wrap items-center gap-4">
-      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener"
-         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-500 text-white text-sm font-medium hover:bg-accent-400 transition">
-        <span class="text-base leading-none">🗺️</span> Open Atlas in a new tab
-        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-      </a>
-      <p class="text-xs text-navy-300">Static site — instant load, no cold start. Best viewed full-screen.</p>
     </div>
   </div>
 </section>
