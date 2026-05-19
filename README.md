@@ -166,36 +166,72 @@ training is supported out of the box; see `scripts/train.sh`.
 
 ---
 
-## Data
+## Data & pretrained weights
 
-The training corpus and pretrained checkpoints are **not** included in
-this repository — they are large and partially derived from third-party
-sources (HuggingFace, Open LLM Leaderboard, Papers-with-Code) whose
-licences must be respected when redistributing.
+The training corpora and the trained ModelLens recommender are released on
+the HuggingFace Hub. Pick the corpus version based on your needs:
 
-The expected layout under `data/<data_name>/` is:
+| Artifact | HF repo | Rows | What's in it |
+|---|---|---:|---|
+| 🤗 **Corpus v1** *(cleaner, smaller)* | [`luisrui/ModelLens-corpus-v1`](https://huggingface.co/datasets/luisrui/ModelLens-corpus-v1) | 1,542,867 | Original ModelLens corpus, R1–R6 deterministic cleaning pipeline applied (~0.0007% residual noise). |
+| 🤗 **Corpus v2** *(expanded, recommended)* | [`luisrui/ModelLens-corpus-v2`](https://huggingface.co/datasets/luisrui/ModelLens-corpus-v2) | 1,807,133 | v1 + HELM (294K) + LiveBench (6K) + OpenCompass (581). Only R6 cross-source dedup re-run. |
+| 🤗 **Trained recommender** | [`luisrui/ModelLens` (Space)](https://huggingface.co/spaces/luisrui/ModelLens) → `checkpoint/MLPMetricFull.pt` | — | Slim `MLPMetricFull` checkpoint (~709 MB) trained on **corpus v2**. Loads with `strict=False`. |
+
+Both corpus repos share the same schema: a flat CSV plus the vocab /
+profile JSONs used at training time.
 
 ```
-data/unified_augmented/
-├── data.csv                     # (model_id, dataset_id, task_id, metric_id, score) records
-├── model2id.json                # model name -> integer id
-├── task2id.json                 # task type -> integer id
-├── metric2id.json               # metric name -> integer id
-├── model2family.json            # model name -> architecture family
-├── model_profile.json           # canonical model metadata (size in B params, family, ...)
-├── model2desp_embeddings.npz    # frozen text embeddings of model cards
-├── dataset2desp.json            # dataset description text (per dataset id)
-├── train/  val/  test/          # split-specific (model, dataset, metric, score) files
-└── new_dataset_evaluation/      # held-out unseen-dataset / unseen-model splits
+data/<corpus>/
+├── data_clean.csv  (v1)  /  data.csv  (v2)   # task, dataset, model, metric, value, dataset_desp
+├── task2id.json                              # task vocab
+├── metric2id.json                            # simplified metric vocab (post-prefix-strip)
+├── family2id.json                            # model-family vocab
+├── model2id.json                             # model name -> integer id
+├── model2family.json                         # model name -> family
+├── model_profile.json                        # HF metadata (size, downloads, license, ...)
+└── model_popularity.json                     # HF download count
 ```
 
-Once available, place the data under `./data/unified_augmented/` (or set
-`data_name` in the YAML to point at a different subdirectory).
+> The published CSV has **6 columns** (`task, dataset, model, metric, value, dataset_desp`).
+> `model_size` is available via `model_profile.json` keyed by model name;
+> `value_std` is a training-time artifact and is intentionally omitted.
+> The `metric` column has the `task::` prefix stripped — use the `task`
+> column to disambiguate when fitting per-task models.
 
-> **Where to get the data.** We are preparing a public release of the
-> 1.62M-record corpus and pretrained ModelLens checkpoints on
-> HuggingFace Datasets. A download script will be added to this repo when
-> the release is finalised. In the meantime, please contact the authors.
+### Downloading
+
+```python
+from huggingface_hub import hf_hub_download
+import pandas as pd, json
+
+# Corpus (v2 recommended)
+csv_path = hf_hub_download(
+    "luisrui/ModelLens-corpus-v2", "data.csv", repo_type="dataset",
+)
+df = pd.read_csv(csv_path, low_memory=False)
+
+task2id   = json.load(open(hf_hub_download("luisrui/ModelLens-corpus-v2", "task2id.json",   repo_type="dataset")))
+metric2id = json.load(open(hf_hub_download("luisrui/ModelLens-corpus-v2", "metric2id.json", repo_type="dataset")))
+
+# Pretrained MLPMetricFull weights (trained on corpus v2)
+ckpt = hf_hub_download("spaces/luisrui/ModelLens", "checkpoint/MLPMetricFull.pt")
+args = hf_hub_download("spaces/luisrui/ModelLens", "checkpoint/args.json")
+```
+
+Or via 🤗 `datasets`:
+
+```python
+from datasets import load_dataset
+ds = load_dataset("luisrui/ModelLens-corpus-v2", split="train")
+```
+
+Once downloaded, place files under `./data/<corpus>/` and point
+`data_name` in the YAML at that subdirectory (e.g. `data_name: unified_augmented_v2`).
+
+> The HuggingFace mirror redistributes only **numerical scores + dataset
+> descriptions**, not benchmark contents. Each underlying leaderboard
+> (HELM, LiveBench, OpenCompass, Papers-with-Code, Open LLM Leaderboard,
+> …) retains its original license.
 
 ---
 
