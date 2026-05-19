@@ -175,7 +175,7 @@ the HuggingFace Hub. Pick the corpus version based on your needs:
 |---|---|---:|---|
 | 🤗 **Corpus v1** *(cleaner, smaller)* | [`luisrui/ModelLens-corpus-v1`](https://huggingface.co/datasets/luisrui/ModelLens-corpus-v1) | 1,542,867 | Original ModelLens corpus, R1–R6 deterministic cleaning pipeline applied (~0.0007% residual noise). |
 | 🤗 **Corpus v2** *(expanded, recommended)* | [`luisrui/ModelLens-corpus-v2`](https://huggingface.co/datasets/luisrui/ModelLens-corpus-v2) | 1,807,133 | v1 + HELM (294K) + LiveBench (6K) + OpenCompass (581). Only R6 cross-source dedup re-run. |
-| 🤗 **Trained recommender** | [`luisrui/ModelLens` (Space)](https://huggingface.co/spaces/luisrui/ModelLens) → `checkpoint/MLPMetricFull.pt` | — | Slim `MLPMetricFull` checkpoint (~709 MB) trained on **corpus v2**. Loads with `strict=False`. |
+| 🤗 **ModelLens checkpoint** | [`luisrui/ModelLens`](https://huggingface.co/luisrui/ModelLens) | — | Trained recommender (~709 MB, slim) trained on **corpus v2**. Loads with `strict=False`. Live demo: [`spaces/luisrui/ModelLens`](https://huggingface.co/spaces/luisrui/ModelLens). |
 
 Both corpus repos share the same schema: a flat CSV plus the vocab /
 profile JSONs used at training time.
@@ -213,9 +213,9 @@ df = pd.read_csv(csv_path, low_memory=False)
 task2id   = json.load(open(hf_hub_download("luisrui/ModelLens-corpus-v2", "task2id.json",   repo_type="dataset")))
 metric2id = json.load(open(hf_hub_download("luisrui/ModelLens-corpus-v2", "metric2id.json", repo_type="dataset")))
 
-# Pretrained MLPMetricFull weights (trained on corpus v2)
-ckpt = hf_hub_download("spaces/luisrui/ModelLens", "checkpoint/MLPMetricFull.pt")
-args = hf_hub_download("spaces/luisrui/ModelLens", "checkpoint/args.json")
+# Pretrained ModelLens weights (trained on corpus v2)
+ckpt = hf_hub_download("luisrui/ModelLens", "ModelLens.pt")
+args = hf_hub_download("luisrui/ModelLens", "args.json")
 ```
 
 Or via 🤗 `datasets`:
