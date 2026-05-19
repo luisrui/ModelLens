@@ -114,6 +114,10 @@
          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
         <i class="fa-solid fa-play"></i> Demo
       </a>
+      <a href="#atlas-live"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-navy-200 text-navy-900 text-sm font-medium hover:bg-navy-50 hover:border-navy-300 transition shadow-sm">
+        <span class="text-base leading-none">🗺️</span> Atlas Graph
+      </a>
       <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener"
          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-600 text-white text-sm font-medium hover:bg-accent-700 transition shadow-sm">
         <span class="text-base leading-none">🤗</span> HuggingFace Space
@@ -277,6 +281,44 @@
   </div>
 </section>
 
+<!-- =================== ATLAS LIVE =================== -->
+<section id="atlas-live" class="py-20 md:py-24 px-6 bg-navy-900 text-white relative overflow-hidden border-t border-navy-800">
+  <div class="absolute inset-0 opacity-30 pointer-events-none"
+       style="background:radial-gradient(circle at 75% 20%, rgba(168,85,247,0.40), transparent 50%), radial-gradient(circle at 20% 80%, rgba(6,182,212,0.25), transparent 55%);"></div>
+  <div class="max-w-6xl mx-auto relative">
+    <p class="text-accent-400 font-semibold text-xs uppercase section-eyebrow mb-3">Interactive atlas</p>
+    <h2 class="text-3xl md:text-4xl font-bold mb-3">Explore the model–dataset universe</h2>
+    <p class="text-navy-200 max-w-3xl mb-10 text-[15px] leading-relaxed">
+      A zoomable, searchable map of <span class="font-semibold text-white">13.6k models</span> and
+      <span class="font-semibold text-white">9k datasets</span>, positioned by ModelLens's learned
+      compatibility geometry. Click any node to see its top-K compatible counterparts ranked by real
+      benchmark performance.
+    </p>
+
+    <div class="rounded-2xl overflow-hidden border border-accent-500/30 shadow-2xl bg-navy-950">
+      <div class="w-full bg-navy-950 relative" style="height: min(80vh, 760px); min-height: 560px;">
+        <iframe
+          src="https://luisrui-modellens-atlas.hf.space"
+          title="ModelLens Atlas — Interactive Compatibility Map"
+          class="absolute inset-0 w-full h-full"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads">
+        </iframe>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center gap-4">
+      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-500 text-white text-sm font-medium hover:bg-accent-400 transition">
+        <span class="text-base leading-none">🗺️</span> Open Atlas in a new tab
+        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+      </a>
+      <p class="text-xs text-navy-300">Static site — instant load, no cold start. Best viewed full-screen.</p>
+    </div>
+  </div>
+</section>
+
 <!-- =================== EXAMPLE RECOMMENDATIONS =================== -->
 <section class="py-20 md:py-24 px-6 bg-white">
   <div class="max-w-6xl mx-auto">
@@ -403,7 +445,7 @@
   <div class="max-w-4xl mx-auto">
     <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3 text-center">Resources</p>
     <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-10 text-center">Find ModelLens online</h2>
-    <div class="grid md:grid-cols-2 gap-5">
+    <div class="grid md:grid-cols-3 gap-5">
       <a href="https://github.com/luisrui/ModelLens" target="_blank" rel="noopener"
          class="group flex items-center gap-4 p-6 bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
         <div class="w-12 h-12 rounded-xl bg-navy-900 text-white flex items-center justify-center shrink-0">
@@ -423,6 +465,17 @@
         <div class="min-w-0 flex-1">
           <p class="text-[11px] uppercase section-eyebrow font-semibold text-navy-500">Demo</p>
           <p class="font-mono text-[13px] md:text-sm text-accent-700 group-hover:text-accent-900 truncate">huggingface.co/spaces/luisrui/ModelLens</p>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square text-navy-300 group-hover:text-accent-600 transition"></i>
+      </a>
+      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener"
+         class="group flex items-center gap-4 p-6 bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-md hover:border-accent-200 transition">
+        <div class="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-map text-2xl"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-[11px] uppercase section-eyebrow font-semibold text-navy-500">Atlas</p>
+          <p class="font-mono text-[13px] md:text-sm text-accent-700 group-hover:text-accent-900 truncate">huggingface.co/spaces/luisrui/modellens-atlas</p>
         </div>
         <i class="fa-solid fa-arrow-up-right-from-square text-navy-300 group-hover:text-accent-600 transition"></i>
       </a>
@@ -460,6 +513,7 @@
     <div class="flex items-center gap-5 text-navy-500 text-sm">
       <a href="https://github.com/luisrui/ModelLens" target="_blank" rel="noopener" class="hover:text-accent-600 transition"><i class="fa-brands fa-github"></i> Code</a>
       <a href="https://huggingface.co/spaces/luisrui/ModelLens" target="_blank" rel="noopener" class="hover:text-accent-600 transition"><i class="fa-solid fa-globe"></i> Demo</a>
+      <a href="https://huggingface.co/spaces/luisrui/modellens-atlas" target="_blank" rel="noopener" class="hover:text-accent-600 transition"><i class="fa-solid fa-map"></i> Atlas</a>
       <a href="paper/ModelLens.pdf" class="hover:text-accent-600 transition"><i class="fa-solid fa-file-pdf"></i> Paper</a>
     </div>
   </div>
