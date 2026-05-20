@@ -306,11 +306,10 @@ If you find ModelLens useful in your research, please cite:
 
 ```bibtex
 @article{cai2026modellens,
-  title   = {{ModelLens}: Finding the Best for Your Task from Myriads of Models},
-  author  = {Cai, Rui and Mo, Weijie Jacky and Wen, Xiaofei and Ma, Qiyao and
-             Zhu, Wenhui and Chen, Xiwen and Chen, Muhao and Zhao, Zhe},
-  journal = {arXiv preprint},
-  year    = {2026}
+  title={ModelLens: Finding the Best for Your Task from Myriads of Models},
+  author={Cai, Rui and Mo, Weijie Jacky and Wen, Xiaofei and Ma, Qiyao and Zhu, Wenhui and Chen, Xiwen and Chen, Muhao and Zhao, Zhe},
+  journal={arXiv preprint arXiv:2605.07075},
+  year={2026}
 }
 ```
 
