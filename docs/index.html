@@ -236,7 +236,30 @@
   <div class="max-w-6xl mx-auto">
     <p class="text-accent-600 font-semibold text-xs uppercase section-eyebrow mb-3">What it learns</p>
     <h2 class="text-3xl md:text-4xl font-bold text-navy-900 mb-3">The model–dataset atlas</h2>
-    <p class="text-navy-600 max-w-3xl mb-12 text-[15px]">Same projection, different latent sources. Text similarity gives a tangle; interaction-aware learning recovers family and domain structure on its own.</p>
+    <div class="text-navy-600 max-w-3xl mb-6 text-[15px] space-y-3">
+      <p>
+        Open-source models are proliferating rapidly, and recent position papers call for
+        systematic <span class="font-semibold text-navy-900">profiling</span> of models and
+        a better understanding of their
+        <span class="font-semibold text-navy-900">competency</span>.
+        <a href="https://huggingface.co/spaces/Eliahu/Model-Atlas" target="_blank" rel="noopener"
+           class="text-accent-700 hover:text-accent-900 underline decoration-accent-300 hover:decoration-accent-600">
+          Model Atlas (Horwitz et al., NeurIPS 2025)
+        </a>
+        was a key inspiration: it maps the model ecosystem itself, revealing family
+        structure and lineage across the open-source landscape.
+      </p>
+      <p>
+        Building on that idea, we draw a similar map for our models — and go one step
+        further by embedding <span class="font-semibold text-navy-900">datasets in the
+        same space</span>, so the atlas exposes not just which models cluster together,
+        but which datasets each model is actually compatible with.
+      </p>
+      <p class="text-sm text-navy-500">
+        Same projection below, different latent sources. Text similarity gives a tangle;
+        interaction-aware learning recovers family and domain structure on its own.
+      </p>
+    </div>
 
     <div class="grid md:grid-cols-2 gap-6">
       <figure class="bg-navy-50/40 rounded-2xl p-5 border border-navy-100">
