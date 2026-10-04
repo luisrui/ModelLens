@@ -1,5 +1,7 @@
 # ModelLens: Finding the Best Model for Your Task from Myriads of Models
 
+<p align="center"><b>NeurIPS 2026</b></p>
+
 <p align="center">
   <a href="https://arxiv.org/pdf/2605.07075" target="_blank">📄 Paper</a>
   &nbsp;|&nbsp;
@@ -15,7 +17,7 @@
 > dataset — without ever running a candidate on the target task.*
 
 This repository contains the official implementation of **ModelLens**, the
-metric-aware ranking framework introduced in our paper *"ModelLens: Finding
+metric-aware ranking framework introduced in our NeurIPS 2026 paper *"ModelLens: Finding
 the Best for Your Task from Myriads of Models"*.
 
 <p align="center">
@@ -305,10 +307,10 @@ implemented in [`module/utils/metric.py`](module/utils/metric.py).
 If you find ModelLens useful in your research, please cite:
 
 ```bibtex
-@article{cai2026modellens,
+@inproceedings{cai2026modellens,
   title={ModelLens: Finding the Best for Your Task from Myriads of Models},
   author={Cai, Rui and Mo, Weijie Jacky and Wen, Xiaofei and Ma, Qiyao and Zhu, Wenhui and Chen, Xiwen and Chen, Muhao and Zhao, Zhe},
-  journal={arXiv preprint arXiv:2605.07075},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
   year={2026}
 }
 ```
